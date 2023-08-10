@@ -1,5 +1,5 @@
 " https://github.c m/AlariCode/purpleschool-neovim
-
+" ~/.config/nvim
 
 set nocompatible             
 filetype plugin on
