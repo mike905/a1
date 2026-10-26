@@ -1,6 +1,4 @@
-" https://github.c m/AlariCode/purpleschool-neovim
-" ~/.config/nvim
-
+set textwidth=80
 set nocompatible             
 filetype plugin on
 syntax on
@@ -27,15 +25,17 @@ vmap <C-x> d<Esc>i
 map <C-v> pi
 imap <C-v> <Esc>pi
 imap <C-z> <Esc>ui
+set formatoptions+=a
 
 set background=light
 "colorscheme PaperColor
 call vundle#begin()
 Plugin 'morhetz/gruvbox'
 Plugin 'vimwiki/vimwiki'
-set colorcolumn=110
+Plugin 'junegunn/goyo.vim'
+set colorcolumn=120
 
-let g:vimwiki_list = [{'path': '~/PycharmProjects/ydirect/сторис/18.8.22/backtothefuture/vimwiki/',
+let g:vimwiki_list = [{'path': '~/dev/own/futur/18.8.22/backtothefuture/vimwiki/',
                       \ 'syntax': 'markdown', 'ext': '.md'}]
 Plugin 'NLKNguyen/papercolor-theme'
 
@@ -140,11 +140,43 @@ set foldcolumn=2
 "подстветка синтаксиса
 syntax on
 set mouse=a
-
-"alias :map
 nmap <F6> :NERDTreeToggle<CR>
 
 set encoding=utf8
 set ffs=unix,dos,mac
 
 
+
+" ===== Дневник, заметки, планы (2026-10-25) =====
+" Ширина колонки: <leader>w (по умолчанию \w) или F7 листает 60, 80, 100, 120, окно целиком. :Wd 70 задаёт любую.
+let g:diary_widths = [60, 80, 100, 120]
+let g:diary_idx = -1
+function! DiaryWidth(...)
+  if a:0 > 0 && a:1 != ''
+    execute 'Goyo ' . a:1
+    echo 'ширина колонки: ' . a:1
+    return
+  endif
+  let g:diary_idx = (g:diary_idx + 1) % (len(g:diary_widths) + 1)
+  if g:diary_idx == len(g:diary_widths)
+    Goyo!
+    echo 'ширина: окно целиком'
+  else
+    execute 'Goyo ' . g:diary_widths[g:diary_idx]
+    echo 'ширина колонки: ' . g:diary_widths[g:diary_idx]
+  endif
+endfunction
+command! -nargs=? Wd call DiaryWidth(<q-args>)
+nnoremap <silent> <leader>w :call DiaryWidth()<CR>
+nnoremap <silent> <F7> :call DiaryWidth()<CR>
+augroup diary
+  autocmd!
+  autocmd BufRead,BufNewFile */vimwiki/*,*/backtothefuture/дни/* call s:DiarySetup()
+augroup END
+function! s:DiarySetup()
+  setlocal wrap linebreak breakindent showbreak=↪\ 
+  setlocal textwidth=0 colorcolumn= formatoptions-=a display+=lastline
+  setlocal nonumber norelativenumber
+  nnoremap <buffer> j gj
+  nnoremap <buffer> k gk
+endfunction
